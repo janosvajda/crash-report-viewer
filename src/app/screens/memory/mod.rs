@@ -1,3 +1,5 @@
+//! Memory feature coordinator and detailed region browser.
+
 mod analysis;
 mod evidence;
 mod map;

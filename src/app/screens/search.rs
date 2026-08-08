@@ -1,3 +1,5 @@
+//! Cross-report evidence search.
+
 use crate::{domain::DumpReport, services::investigation, ui::widgets::section_title};
 use eframe::egui::{self, RichText};
 

@@ -1,3 +1,5 @@
+//! Concurrent `.dmp` discovery with progress events for the dump library.
+
 use std::{
     collections::VecDeque,
     path::{Path, PathBuf},
@@ -9,12 +11,14 @@ use std::{
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+/// A discovered dump and the metadata needed by the library list.
 pub struct FileEntry {
     pub path: PathBuf,
     pub size: u64,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+/// Messages emitted during a scan. `Finished` is emitted once all workers stop.
 pub enum ScanEvent {
     FoundBatch(Vec<FileEntry>),
     Progress { path: PathBuf, directories: usize },
@@ -22,13 +26,17 @@ pub enum ScanEvent {
 }
 
 struct Work {
+    // `active` plus `directories.len()` represents outstanding work. The last
+    // worker to make both zero marks the pool finished and wakes its peers.
     directories: VecDeque<PathBuf>,
     active: usize,
     finished: bool,
 }
 
-/// Recursively scans with a bounded worker pool. Directory I/O benefits from
-/// limited concurrency, while the cap avoids overwhelming disks and network mounts.
+/// Recursively scan with a bounded worker pool and stream results to `sender`.
+///
+/// Unreadable directories are skipped. Directory I/O benefits from limited
+/// concurrency, while the cap avoids overwhelming disks and network mounts.
 pub fn scan(root: &Path, sender: &Sender<ScanEvent>) {
     scan_roots(&[root.to_owned()], sender, worker_count());
 }
@@ -45,6 +53,7 @@ fn scan_roots(roots: &[PathBuf], sender: &Sender<ScanEvent>, workers: usize) {
     let visited = Arc::new(AtomicUsize::new(0));
     let cancelled = Arc::new(AtomicBool::new(false));
 
+    // Scoped workers borrow the shared queue and cannot outlive this scan.
     std::thread::scope(|scope| {
         for _ in 0..workers.max(1) {
             let work = Arc::clone(&work);

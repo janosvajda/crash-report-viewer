@@ -1,3 +1,5 @@
+//! Visual composition of memory captured in the dump, not a full address-space map.
+
 use super::{
     MemoryAction,
     analysis::{region_references, region_relevance, stack_thread_for_region},

@@ -1,4 +1,10 @@
+//! Navigation and cross-feature requests returned by otherwise local screens.
+
+use std::path::PathBuf;
+
 #[derive(Clone, Debug, PartialEq, Eq)]
+/// Screens request effects instead of mutating the application coordinator or
+/// performing navigation themselves.
 pub enum ScreenAction {
     OpenThreads,
     OpenModules,
@@ -8,4 +14,3 @@ pub enum ScreenAction {
     LoadComparison,
     OpenPath(PathBuf),
 }
-use std::path::PathBuf;

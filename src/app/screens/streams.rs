@@ -1,3 +1,5 @@
+//! Low-level minidump stream inventory for format and completeness diagnostics.
+
 use crate::{
     domain::DumpReport,
     services::analyzer,

@@ -1,8 +1,12 @@
+//! Compile-time embedded visual assets used by both native and egui surfaces.
+
 use eframe::egui::{ColorImage, Context, IconData, TextureHandle, TextureOptions};
 
 const LOGO_PNG: &[u8] = include_bytes!("../../assets/crashlens-logo.png");
 
 fn decoded_logo() -> Option<(Vec<u8>, u32, u32)> {
+    // Decode once per consumer at startup. Keeping PNG bytes embedded makes
+    // development (`cargo run`) and packaged execution behave identically.
     let image = image::load_from_memory(LOGO_PNG).ok()?.into_rgba8();
     let (width, height) = image.dimensions();
     Some((image.into_raw(), width, height))

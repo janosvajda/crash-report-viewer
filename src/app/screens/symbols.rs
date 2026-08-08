@@ -1,3 +1,5 @@
+//! Symbol-server, local-symbol, and source-remapping configuration screen.
+
 use super::ScreenAction;
 use crate::{domain::DumpReport, ui::widgets::section_title};
 use eframe::egui::{self, FontId, RichText};

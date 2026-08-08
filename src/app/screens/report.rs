@@ -1,3 +1,5 @@
+//! Investigation notes and explicit, destination-driven export workflows.
+
 use super::super::session::InvestigationStatus;
 use crate::{
     domain::DumpReport,

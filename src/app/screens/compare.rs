@@ -1,3 +1,5 @@
+//! Side-by-side crash comparison and explanations of meaningful differences.
+
 use super::ScreenAction;
 use crate::{
     domain::{DumpReport, ModuleOwnership},

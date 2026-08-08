@@ -1,3 +1,5 @@
+//! Loaded-code browser with links back to frames that use each module.
+
 use crate::{
     domain::{DumpReport, ModuleOwnership, ModuleRow},
     services::analyzer,

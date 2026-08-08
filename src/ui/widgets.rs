@@ -1,3 +1,5 @@
+//! Small reusable controls with stable sizing across hover and selection states.
+
 use eframe::egui::{self, Align, Align2, Layout, RichText, Sense};
 
 pub fn selection_row(
