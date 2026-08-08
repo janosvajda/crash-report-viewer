@@ -1,7 +1,14 @@
+//! Deterministic analysis of bytes actually captured in a minidump.
+//!
+//! This is evidence analysis, not heap reconstruction. Ordinary minidumps often
+//! omit allocator metadata and much of the address space, so results are limited
+//! to recorded regions, stacks, modules, and registers.
+
 use crate::domain::{DumpReport, MemoryRow, VirtualAddress};
 use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+/// A pointer-sized value decoded from a captured memory region.
 pub struct DecodedPointer {
     pub address: u64,
     pub value: u64,
@@ -10,6 +17,7 @@ pub struct DecodedPointer {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+/// A crashed-frame register related to known dump data.
 pub struct RegisterFinding {
     pub register: String,
     pub value: String,
@@ -18,6 +26,7 @@ pub struct RegisterFinding {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+/// The strongest known owner of an address found in captured memory.
 pub enum AddressTarget {
     Null,
     ThreadStack { thread_id: u32 },
@@ -53,6 +62,10 @@ impl fmt::Display for RegisterTarget {
     }
 }
 
+/// Input accepted by address-analysis helpers.
+///
+/// New domain code should use `VirtualAddress`; string implementations remain
+/// for values originating in third-party processor output.
 pub trait AddressInput {
     fn address(self) -> Option<u64>;
 }
@@ -157,6 +170,8 @@ pub fn decoded_pointers(
     region: &MemoryRow,
     limit: usize,
 ) -> Vec<DecodedPointer> {
+    // Never infer width from the host: a 32-bit dump may be inspected on a
+    // 64-bit machine, and an unknown width makes every decoded value suspect.
     let Some(width) = report.pointer_size.map(|size| size.bytes()) else {
         return Vec::new();
     };
@@ -192,6 +207,8 @@ fn follow_pointer_chain(
 ) -> Vec<u64> {
     let mut chain = vec![first_target];
     let mut address = first_target;
+    // Corrupted structures commonly contain cycles. Bound depth and stop when
+    // an address repeats so a single region cannot monopolise analysis time.
     for _ in 1..max_depth {
         let Some(next) = read_pointer(report, address, width) else {
             break;
@@ -321,6 +338,8 @@ fn ranges_overlap(region: &MemoryRow, other_start: Option<u64>, other_size: u64)
 }
 
 fn decode_little_endian(bytes: &[u8]) -> u64 {
+    // The analyzer currently supports little-endian pointer encodings. Keeping
+    // this conversion local makes a future byte-order field straightforward.
     bytes.iter().enumerate().fold(0, |value, (shift, byte)| {
         value | ((*byte as u64) << (shift * 8))
     })

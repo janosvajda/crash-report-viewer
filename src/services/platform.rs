@@ -1,6 +1,9 @@
+//! Small operating-system integration points kept out of egui screens.
+
 use anyhow::{Context, Result, bail};
 use std::{path::Path, process::Command};
 
+/// Ask the host desktop to open or reveal a filesystem path.
 pub fn open_path(path: &Path) -> Result<()> {
     let mut command = platform_open_command(path);
     let status = command

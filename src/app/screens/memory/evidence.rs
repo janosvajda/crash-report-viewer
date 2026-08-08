@@ -1,3 +1,5 @@
+//! Compact evidence path from the crashed frame to relevant captured memory.
+
 use super::{
     BrowserDetail, MemoryAction, MemoryAnalysisCache, MemoryMode, evidence_tile, region_references,
     region_relevance,

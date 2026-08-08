@@ -1,7 +1,7 @@
 # CrashLens
 
 <p align="center">
-  <img src="assets/crashlens-logo.png" alt="CrashLens logo" width="220">
+  <img src="assets/crashlens-logo.png" alt="CrashLens logo" width="256">
 </p>
 
 CrashLens is a desktop tool for investigating `.dmp` and `.mdmp` crash dumps. It is written in Rust and uses Mozilla’s minidump libraries for parsing, stack unwinding, and symbol resolution.

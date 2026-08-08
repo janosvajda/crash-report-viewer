@@ -1,3 +1,5 @@
+//! Application-wide egui fonts, spacing, colours, and interaction styling.
+
 use eframe::egui::{self, Color32, FontData, FontDefinitions, FontFamily, Stroke};
 use std::sync::Arc;
 

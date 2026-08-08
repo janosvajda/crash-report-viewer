@@ -1,7 +1,13 @@
+//! Pure investigation helpers derived from an analysed crash report.
+//!
+//! These functions rank existing evidence. They do not imply certainty when a
+//! dump lacks symbols, source information, or relevant memory.
+
 use crate::domain::DumpReport;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+/// A searchable piece of evidence and the screen that owns it.
 pub struct SearchHit {
     pub kind: &'static str,
     pub value: String,
@@ -28,6 +34,7 @@ pub fn likely_cause(report: &DumpReport) -> &'static str {
     }
 }
 
+/// Build a stable grouping key from the reason and first useful stack frames.
 pub fn crash_signature(report: &DumpReport) -> String {
     let frames = report
         .threads

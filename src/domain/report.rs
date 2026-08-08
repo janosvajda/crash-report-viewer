@@ -1,8 +1,14 @@
+//! Typed, UI-independent representation of a parsed crash dump.
+//!
+//! Missing dump metadata stays missing. Consumers must not turn an unknown
+//! address, permission, or architecture into a guess.
+
 use std::fmt;
 use std::path::PathBuf;
 use std::str::FromStr;
 
 #[derive(Clone, Debug, Default)]
+/// Symbol lookup inputs supplied to the stack walker.
 pub struct SymbolConfig {
     pub local_paths: Vec<PathBuf>,
     pub server_urls: Vec<String>,
@@ -10,6 +16,9 @@ pub struct SymbolConfig {
 }
 
 #[derive(Clone, Debug, Default)]
+/// Complete analysis result shared by the application screens.
+///
+/// This is the boundary between parser-specific types and the rest of CrashLens.
 pub struct DumpReport {
     pub path: PathBuf,
     pub file_size: u64,
@@ -29,6 +38,7 @@ pub struct DumpReport {
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+/// Operating system recorded by the dump, not the current host.
 pub enum OperatingSystem {
     Windows,
     MacOs,
@@ -59,6 +69,7 @@ impl fmt::Display for OperatingSystem {
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+/// Processor architecture recorded in the system-information stream.
 pub enum CpuArchitecture {
     X86,
     X86_64,
@@ -91,6 +102,7 @@ impl fmt::Display for CpuArchitecture {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// Width used when interpreting raw memory as pointer-sized values.
 pub enum PointerSize {
     Bytes4,
     Bytes8,
@@ -230,6 +242,10 @@ pub struct StreamRow {
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
+/// An address that may be absent or malformed in the source dump.
+///
+/// The parsed value prevents repeated hex parsing while `Display` retains the
+/// representation expected by the UI and exports.
 pub struct VirtualAddress(Option<u64>);
 
 impl VirtualAddress {

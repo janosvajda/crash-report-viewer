@@ -1,3 +1,5 @@
+//! State grouped by the user workflow and reset lifetime it belongs to.
+
 use super::{
     screens::MemoryAnalysisCache,
     state::{AnalysisJob, SymbolSettings},
@@ -36,6 +38,7 @@ impl AnalysisViewState {
 }
 
 /// User-authored investigation data and symbol/source configuration.
+/// This survives navigation between report screens.
 #[derive(Default)]
 pub(super) struct InvestigationState {
     pub symbols: SymbolSettings,
@@ -75,6 +78,7 @@ impl fmt::Display for InvestigationStatus {
 }
 
 /// Everything needed for the optional second report and library pair selection.
+/// Keeping it separate prevents opening a report from erasing library choices.
 #[derive(Default)]
 pub(super) struct ComparisonState {
     pub path: String,

@@ -1,3 +1,5 @@
+//! Small set of entry points into the most useful memory evidence.
+
 use super::{MemoryAction, evidence_node};
 use crate::{domain::DumpReport, services::memory as memory_analysis, ui::widgets::pane_heading};
 use eframe::egui::{self, RichText};

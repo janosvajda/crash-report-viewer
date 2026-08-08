@@ -1,3 +1,8 @@
+//! Application composition, navigation, and background-result coordination.
+//!
+//! `CrashLens` is the only owner of cross-screen state. Feature screens receive
+//! narrow mutable state and return actions for effects outside their boundary.
+
 use self::state::{AnalysisJob, LibraryState, set_comparison_selected, take_comparison_pair};
 use crate::{
     domain::{DumpReport, SymbolConfig},
@@ -122,6 +127,8 @@ impl CrashLens {
     }
 
     fn receive_analysis(&mut self, ctx: &egui::Context) {
+        // `try_recv` keeps the immediate-mode update loop responsive while stack
+        // walking continues on the analysis worker.
         let result = self.analysis_job.as_ref().and_then(AnalysisJob::poll);
         if let Some(result) = result {
             self.analysis_job = None;
@@ -217,6 +224,8 @@ impl CrashLens {
         self.error = None;
         self.scan = Some(receiver);
         std::thread::spawn(move || {
+            // Scanner events wake egui so results appear promptly even when the
+            // user is not otherwise causing repaint events.
             discovery::scan(Path::new("/"), &sender);
             repaint.request_repaint();
         });

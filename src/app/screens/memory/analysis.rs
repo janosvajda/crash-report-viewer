@@ -1,3 +1,5 @@
+//! Presentation-oriented relationships between captured regions and crash data.
+
 use crate::{
     domain::{DumpReport, MemoryRow},
     services::memory as memory_analysis,

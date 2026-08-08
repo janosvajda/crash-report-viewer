@@ -1,3 +1,5 @@
+//! Cached, presentation-specific state for the memory investigation feature.
+
 use crate::{
     domain::{DumpReport, MemoryRow},
     services::memory as memory_analysis,
@@ -22,6 +24,10 @@ pub(super) enum BrowserDetail {
 }
 
 #[derive(Default)]
+/// Expensive derivations keyed by the current report, query, or selected region.
+///
+/// Immediate-mode rendering calls these refresh methods on every frame. They
+/// therefore recompute only when their effective input changes.
 pub struct MemoryAnalysisCache {
     pub(super) query: String,
     pub(super) memory_count: usize,
@@ -93,6 +99,8 @@ impl MemoryAnalysisCache {
     }
 
     pub(super) fn refresh_region(&mut self, report: &DumpReport, region: &MemoryRow) {
+        // A start address identifies a region within one report. `clear` is
+        // called before a different report becomes current.
         if self.selected_start == region.start {
             return;
         }

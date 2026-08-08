@@ -1,3 +1,5 @@
+//! Long-lived application state and background-job adapters.
+
 use crate::{
     domain::{DumpReport, SymbolConfig},
     services::{analyzer, scanner::FileEntry},
@@ -17,14 +19,19 @@ pub struct AnalysisJob {
 }
 
 impl AnalysisJob {
+    /// Construct a job around an existing receiver, primarily for deterministic tests.
     pub fn new(path: PathBuf, receiver: Receiver<AnalysisResult>) -> Self {
         Self { path, receiver }
     }
 
+    /// Poll without blocking the frame currently being rendered.
     pub fn poll(&self) -> Option<AnalysisResult> {
         self.receiver.try_recv().ok()
     }
 
+    /// Run parsing and stack walking on a detached worker.
+    ///
+    /// A send failure only means the window no longer needs this result.
     pub fn spawn(path: PathBuf, symbols: SymbolConfig) -> Self {
         let (sender, receiver) = mpsc::channel();
         let worker_path = path.clone();
@@ -38,6 +45,7 @@ impl AnalysisJob {
 }
 
 #[derive(Default)]
+/// Dump-library contents plus transient progress for the active scan.
 pub struct LibraryState {
     pub files: Vec<FileEntry>,
     pub scan_location: Option<PathBuf>,
@@ -73,6 +81,7 @@ impl LibraryState {
 }
 
 #[derive(Default)]
+/// Editable symbol and source-path settings retained between analyses.
 pub struct SymbolSettings {
     pub local_paths: String,
     pub server_urls: String,
@@ -112,6 +121,8 @@ fn nonempty_lines(value: &str) -> impl Iterator<Item = &str> {
 }
 
 pub fn set_comparison_selected(selection: &mut Vec<PathBuf>, path: &Path, selected: bool) {
+    // Comparison is deliberately a pair. Refuse a third item rather than
+    // silently replacing a choice the user can still see in the library.
     if selected {
         if selection.len() < 2 && !selection.iter().any(|existing| existing == path) {
             selection.push(path.to_owned());

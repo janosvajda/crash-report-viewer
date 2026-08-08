@@ -1,3 +1,5 @@
+//! Native process entry point. Application behaviour lives in `app`.
+
 mod app;
 mod domain;
 mod services;

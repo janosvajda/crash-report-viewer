@@ -1,3 +1,8 @@
+//! Presentation-ready relationships derived from one or two domain reports.
+//!
+//! Keeping this logic outside egui makes comparisons and evidence ordering easy
+//! to test without constructing a window.
+
 use crate::{
     domain::{DumpReport, ModuleOwnership},
     services::investigation,
@@ -5,6 +10,7 @@ use crate::{
 use std::{collections::BTreeMap, path::Path};
 
 #[derive(Debug, PartialEq, Eq)]
+/// One ordered link from the exception to actionable evidence.
 pub struct EvidenceStep {
     pub title: &'static str,
     pub value: String,
@@ -78,6 +84,7 @@ pub fn investigation_insights(report: &DumpReport) -> Vec<InvestigationInsight> 
 }
 
 #[derive(Debug, PartialEq, Eq)]
+/// One report field and its value in each side of a comparison.
 pub struct FieldDelta {
     pub field: &'static str,
     pub current: String,

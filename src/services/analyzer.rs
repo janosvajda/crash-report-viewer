@@ -1,3 +1,8 @@
+//! Minidump ingestion and stack walking.
+//!
+//! Parser-specific values stop at this module. The application receives a typed
+//! report and does not depend on minidump crate structures.
+
 use crate::domain::{
     CpuArchitecture, DumpReport, FrameRow, MemoryPermissions, MemoryRow, ModuleOwnership,
     ModuleRow, OperatingSystem, PointerSize, StreamRow, SymbolConfig, SymbolStatus, ThreadRow,
@@ -11,6 +16,10 @@ use minidump::{
 };
 use std::path::Path;
 
+/// Parse one dump and enrich it with stacks using the configured symbol sources.
+///
+/// This performs blocking I/O and stack walking, so callers must keep it off the
+/// egui update thread.
 pub fn analyse(path: &Path, symbols: &SymbolConfig) -> Result<DumpReport> {
     let dump = Minidump::read_path(path)
         .with_context(|| format!("Could not parse {} as a minidump", path.display()))?;
@@ -185,6 +194,8 @@ fn classify_module(name: &str) -> ModuleOwnership {
 }
 
 fn hex_preview(bytes: &[u8], base: u64) -> String {
+    // Bound the inline preview; complete captured bytes remain in `MemoryRow`
+    // for on-demand inspection by the memory feature.
     use std::fmt::Write as _;
     let mut output = String::with_capacity(bytes.len().min(128) * 4);
     for (line, chunk) in bytes.chunks(16).take(8).enumerate() {
@@ -217,6 +228,8 @@ where
 {
     use minidump_unwind::{Symbolizer, http_symbol_supplier, simple_symbol_supplier};
 
+    // Analysis already runs on a dedicated worker. A current-thread runtime is
+    // sufficient for the async stack walker and avoids a process-wide runtime.
     let Ok(runtime) = tokio::runtime::Builder::new_current_thread().build() else {
         report
             .diagnostics

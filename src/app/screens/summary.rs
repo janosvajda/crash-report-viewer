@@ -1,3 +1,5 @@
+//! Investigation-first crash summary and recommended next actions.
+
 use super::ScreenAction;
 use crate::{
     domain::DumpReport,

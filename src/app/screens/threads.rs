@@ -1,3 +1,5 @@
+//! Virtualised thread and stack-frame investigation screen.
+
 use super::ScreenAction;
 use crate::{
     domain::{DumpReport, ModuleOwnership},

@@ -1,3 +1,8 @@
+//! Rendering and writing user-selected investigation artifacts.
+//!
+//! Export functions never modify the source dump. Callers provide the complete
+//! destination so save-dialog policy remains in the application layer.
+
 use crate::{domain::DumpReport, services::investigation};
 use anyhow::{Context, Result};
 use std::{
@@ -5,6 +10,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
+/// Write a human-readable or privacy-reduced Markdown report.
+///
+/// Privacy reduction removes parent paths from rendered fields; it cannot
+/// guarantee anonymisation of arbitrary strings captured in process memory.
 pub fn export_markdown_to(
     path: &Path,
     report: &DumpReport,
@@ -27,6 +36,7 @@ pub fn export_stack_to(path: &Path, report: &DumpReport) -> Result<PathBuf> {
     write_export(path, render_stack(report).as_bytes())
 }
 
+/// Create a directory containing the common investigation artifacts.
 pub fn export_bundle_to(
     directory: &Path,
     report: &DumpReport,
