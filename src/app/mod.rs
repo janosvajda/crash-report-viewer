@@ -22,7 +22,7 @@ use screens::{
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::mpsc::{self, Receiver};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 #[derive(Clone, Copy, PartialEq)]
 pub(super) enum Page {
@@ -49,6 +49,8 @@ pub struct CrashLens {
     comparison: ComparisonState,
     crash_history: Vec<Arc<DumpReport>>,
     analysis_job: Option<AnalysisJob>,
+    logo: egui::TextureHandle,
+    started_at: Instant,
 }
 
 impl CrashLens {
@@ -66,7 +68,51 @@ impl CrashLens {
             comparison: ComparisonState::default(),
             crash_history: Vec::new(),
             analysis_job: None,
+            logo: crate::ui::assets::logo_texture(&cc.egui_ctx),
+            started_at: Instant::now(),
         }
+    }
+
+    fn splash(&self, ui: &mut egui::Ui) -> bool {
+        const DURATION: Duration = Duration::from_millis(1800);
+        let elapsed = self.started_at.elapsed();
+        if elapsed >= DURATION {
+            return false;
+        }
+
+        ui.ctx().request_repaint_after(Duration::from_millis(16));
+        ui.painter()
+            .rect_filled(ui.max_rect(), 0.0, Color32::from_rgb(4, 13, 31));
+        let available_height = ui.available_height();
+        ui.vertical_centered(|ui| {
+            ui.add_space(((available_height - 390.0) * 0.5).max(20.0));
+            ui.add(
+                egui::Image::new(&self.logo)
+                    .fit_to_exact_size(egui::vec2(240.0, 240.0))
+                    .corner_radius(36.0),
+            );
+            ui.add_space(18.0);
+            ui.label(
+                RichText::new("CrashLens")
+                    .size(34.0)
+                    .strong()
+                    .color(Color32::WHITE),
+            );
+            ui.label(
+                RichText::new("Crash dump investigation")
+                    .size(16.0)
+                    .color(Color32::from_rgb(157, 180, 216)),
+            );
+            ui.add_space(22.0);
+            let progress = (elapsed.as_secs_f32() / DURATION.as_secs_f32()).clamp(0.0, 1.0);
+            ui.add_sized(
+                [220.0, 5.0],
+                egui::ProgressBar::new(progress)
+                    .fill(Color32::from_rgb(67, 205, 239))
+                    .corner_radius(3.0),
+            );
+        });
+        true
     }
 
     fn open(&mut self, path: PathBuf) {
@@ -650,6 +696,9 @@ impl eframe::App for CrashLens {
         // renderer's black clear color.
         ui.painter()
             .rect_filled(ui.max_rect(), 0.0, ui.visuals().panel_fill);
+        if self.splash(ui) {
+            return;
+        }
         self.receive_scan_results(ui.ctx());
         self.receive_analysis(ui.ctx());
         self.receive_comparison(ui.ctx());

@@ -4,11 +4,15 @@ mod services;
 mod ui;
 
 fn main() -> eframe::Result {
+    let mut viewport = eframe::egui::ViewportBuilder::default()
+        .with_inner_size([1280.0, 820.0])
+        .with_min_inner_size([920.0, 600.0])
+        .with_drag_and_drop(true);
+    if let Some(icon) = ui::assets::app_icon() {
+        viewport = viewport.with_icon(icon);
+    }
     let options = eframe::NativeOptions {
-        viewport: eframe::egui::ViewportBuilder::default()
-            .with_inner_size([1280.0, 820.0])
-            .with_min_inner_size([920.0, 600.0])
-            .with_drag_and_drop(true),
+        viewport,
         centered: true,
         // On macOS 26 AppKit can abort while tearing down its internal
         // NSTouchBar observer after winit returns. Let the event loop own

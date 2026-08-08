@@ -1,5 +1,33 @@
-/target
+# Rust build output
+/target/
+
+# Crash dumps may contain credentials, personal data, source paths, and memory.
 *.dmp
 *.mdmp
-.DS_Store
 
+# CrashLens-generated investigation artifacts may also contain sensitive data.
+*-report.md
+*-sanitized.md
+*-stack.txt
+*-analysis.json
+*-investigation/
+
+# Local configuration and logs
+.env
+.env.*
+!.env.example
+*.log
+
+# Native debug artifacts
+*.dSYM/
+*.pdb
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS metadata
+.DS_Store

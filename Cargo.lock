@@ -641,6 +641,7 @@ dependencies = [
  "eframe",
  "egui_extras",
  "epaint_default_fonts",
+ "image",
  "minidump",
  "minidump-processor",
  "minidump-unwind",
