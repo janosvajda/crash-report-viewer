@@ -1,0 +1,25 @@
+[package]
+name = "crashlens"
+version = "0.1.0"
+edition = "2024"
+description = "A native minidump crash explorer"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+anyhow = "1.0"
+eframe = { version = "0.35", default-features = false, features = ["glow", "wayland", "x11"] }
+epaint_default_fonts = "0.34.2"
+egui_extras = "0.35"
+minidump = "0.26"
+minidump-processor = "0.26"
+minidump-unwind = { version = "0.26", features = ["http"] }
+rfd = "0.15"
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+lto = "thin"
+strip = true
